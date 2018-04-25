@@ -2,23 +2,21 @@
 
 class MessageProcessor
   def initialize(
-    unpacker: UnPacker.new,
+    unpacker: UnPacker.new(CounterPartyFinder.new),
     auditor: Auditor.new,
-    counter_party_finder: CounterPartyFinder.new,
     location_finder: LocationFinder.new,
     domestic_notifier: DomesticNotifier.new,
     imported_notifier: ImportedNotifier.new
   )
     @unpacker = unpacker
     @auditor = auditor
-    @counter_party_finder = counter_party_finder
     @location_finder = location_finder
     @domestic_notifier = domestic_notifier
     @imported_notifier = imported_notifier
   end
 
   def on_message(message)
-    unpacked = unpacker.unpack(message, counter_party_finder)
+    unpacked = unpacker.unpack(message)
     auditor.record_receipt_of(unpacked)
 
     if location_finder.is_domestic(unpacked)
@@ -30,7 +28,7 @@ class MessageProcessor
 
   private
 
-  attr_reader :unpacker, :auditor, :counter_party_finder
+  attr_reader :unpacker, :auditor
   attr_reader :location_finder, :domestic_notifier, :imported_notifier
 end
 
